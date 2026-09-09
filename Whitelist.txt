@@ -1,0 +1,19 @@
+
+| Destination                    | Port | Why                                    |
+| ------------------------------ | ---: | -------------------------------------- |
+| `subscription.rhsm.redhat.com` |  443 | RHEL registration/entitlement          |
+| `cdn.redhat.com`               |  443 | RHEL BaseOS/AppStream/security content |
+| `*.akamaiedge.net`             |  443 | Red Hat CDN delivery                   |
+| `*.akamaitechnologies.com`     |  443 | Alternative Red Hat CDN delivery       |
+| `download.docker.com`          |  443 | Docker Engine + Compose RPM repository |
+| `quay.io`                      |  443 | Pulp container images                  |
+| `cdn.quay.io`                  |  443 | Quay image layers                      |
+| `cdn01.quay.io`                |  443 | Quay CDN                               |
+| `cdn02.quay.io`                |  443 | Quay CDN                               |
+| `cdn03.quay.io`                |  443 | Quay CDN                               |
+| `cdn04.quay.io`                |  443 | Quay CDN                               |
+| `cdn05.quay.io`                |  443 | Quay CDN                               |
+| `cdn06.quay.io`                |  443 | Quay CDN                               |
+| `yum.oracle.com`               |  443 | Oracle Linux repositories              |
+| `archive.ubuntu.com`           |  443 | Ubuntu Base/Updates repositories       |
+| `security.ubuntu.com`          |  443 | Ubuntu security repositories           |
