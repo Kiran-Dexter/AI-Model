@@ -1,0 +1,131 @@
+===============================================================================
+  DISABLE ADOBE ACROBAT / READER AI ASSISTANT VIA GROUP POLICY (GPO)
+  Applies to: Windows 10, Windows 11, Windows Server 2019
+  Covers:     Adobe Acrobat Pro/Standard and Adobe Acrobat Reader
+===============================================================================
+
+
+WHAT THIS DOES
+--------------
+Sets the registry value  bEnableGentech = 0  under Adobe's FeatureLockDown key.
+This turns off Acrobat/Reader generative AI (AI Assistant, AI summaries, the
+"Ask AI Assistant" button) for all users on the computer. Users cannot turn it
+back on from Preferences.
+
+
+-------------------------------------------------------------------------------
+STEP 1 - OPEN GROUP POLICY MANAGEMENT
+-------------------------------------------------------------------------------
+1. On a domain controller or admin PC, open  Group Policy Management  (gpmc.msc).
+2. Right-click the OU that contains your computers.
+3. Choose  "Create a GPO in this domain, and Link it here..."
+4. Name it:  Disable Adobe Acrobat AI
+5. Right-click the new GPO and choose  Edit.
+
+
+-------------------------------------------------------------------------------
+STEP 2 - GO TO REGISTRY PREFERENCES
+-------------------------------------------------------------------------------
+In the Group Policy Management Editor, go to:
+
+   Computer Configuration
+     > Preferences
+       > Windows Settings
+         > Registry
+
+
+-------------------------------------------------------------------------------
+STEP 3 - CREATE THE REGISTRY ITEMS (repeat 4 times)
+-------------------------------------------------------------------------------
+Right-click  Registry  >  New  >  Registry Item
+
+Use these SAME settings for every item:
+
+   Action       :  Update
+   Hive         :  HKEY_LOCAL_MACHINE
+   Value name   :  bEnableGentech
+   Value type   :  REG_DWORD
+   Value data   :  0
+   Base         :  Decimal
+
+Only the KEY PATH changes. Create one item for each line below:
+
+   Item 1:  SOFTWARE\Policies\Adobe\Adobe Acrobat\DC\FeatureLockDown
+   Item 2:  SOFTWARE\Policies\Adobe\Acrobat Reader\DC\FeatureLockDown
+   Item 3:  SOFTWARE\WOW6432Node\Policies\Adobe\Adobe Acrobat\DC\FeatureLockDown
+   Item 4:  SOFTWARE\WOW6432Node\Policies\Adobe\Acrobat Reader\DC\FeatureLockDown
+
+Click  OK  after each one.
+
+   NOTE: Item 1 is the main one (current Acrobat and Reader).
+         Items 2-4 cover older 32-bit Reader installs. They do no harm on
+         computers that do not use them.
+
+
+-------------------------------------------------------------------------------
+STEP 4 - APPLY THE POLICY
+-------------------------------------------------------------------------------
+1. Close the Group Policy Management Editor.
+2. Make sure the GPO is linked to the correct OU and is enabled.
+3. Computers pick it up at the next policy refresh (about 90 minutes) or reboot.
+   To apply immediately on a test PC, open Command Prompt as Administrator and run:
+
+      gpupdate /force
+
+
+-------------------------------------------------------------------------------
+STEP 5 - TEST ON ONE PC FIRST
+-------------------------------------------------------------------------------
+Open Command Prompt as Administrator and run:
+
+   reg query "HKLM\SOFTWARE\Policies\Adobe\Adobe Acrobat\DC\FeatureLockDown" /v bEnableGentech
+
+Expected result:
+
+   bEnableGentech    REG_DWORD    0x0
+
+Then:
+   1. Fully close Adobe Acrobat / Reader (check Task Manager - no Acrobat.exe).
+   2. Open Acrobat / Reader again.
+   3. Check that:
+        [ ] The "AI Assistant" button is gone from the toolbar
+        [ ] Menu > Preferences no longer shows a "Generative AI" section
+
+If the setting is not applied, run on the PC:
+
+   gpresult /r /scope computer
+
+and check that "Disable Adobe Acrobat AI" is listed under Applied GPOs.
+
+Test on one PC of each type (Windows 10, Windows 11, Server 2019) before
+rolling out to everyone.
+
+
+-------------------------------------------------------------------------------
+STEP 6 - ROLL OUT
+-------------------------------------------------------------------------------
+Once testing passes, link the GPO to the remaining OUs.
+Users must close and reopen Acrobat / Reader for the change to take effect.
+
+
+-------------------------------------------------------------------------------
+HOW TO UNDO (if needed)
+-------------------------------------------------------------------------------
+Option A: Edit each of the 4 registry items and change  Action  to  Delete.
+          Run gpupdate /force. The value is removed from the computers.
+
+Option B: Unlink or disable the GPO. (Note: with "Update", the value can stay
+          on computers after unlinking. Use Option A to remove it cleanly.)
+
+
+-------------------------------------------------------------------------------
+NOTES
+-------------------------------------------------------------------------------
+- Adobe updates sometimes add new AI features. Re-check after major Acrobat
+  updates.
+- This disables AI in the desktop app only. To stop uploads to Adobe's web
+  version (acrobat.adobe.com / PDF Spaces), use your DLP or web filter.
+- Acrobat in Microsoft Teams and the Acrobat Chrome extension have their own
+  AI settings and are not covered by this registry key.
+
+===============================================================================
